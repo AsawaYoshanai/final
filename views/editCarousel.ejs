@@ -32,13 +32,33 @@
         </div>
     </nav>
 
-    <h1>Users List</h1>
+    <h1>Carousel Info</h1>
 
-    <div>
-        <% users.forEach((i) => { %>
-            <%= i.login %> - <%= i.password %> - <%= i.name %> - <%= i.surname %> - <%= i.email %> - <%= i.admin %>
+    <div class="info">
+        <% carousel.forEach((i) => { %>
+            <%= i['_id'] %> - <%= i.title %> - <%= i.body %>
             <hr> <br>
         <% }) %>
     </div>
+
+    <form action="/editCarousel" method="POST">
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">ID</span>
+        <input name="id" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+      </div>
+
+      <div class="input-group mb-3">
+          <span class="input-group-text" id="inputGroup-sizing-default">Title</span>
+          <input name="title" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+      </div>
+
+      <div class="input-group mb-3">
+          <span class="input-group-text" id="inputGroup-sizing-default">Body</span>
+          <input name="body" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+      </div>
+
+      <button type="submit" class="btn btn-outline-dark">Submit</button>
+  </form>
+
 </body>
 </html>

@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     email:String,
     password:String,
     admin: {
-        type: String,
+        type: Boolean,
         default: false
     }
   });

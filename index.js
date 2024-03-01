@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const axios = require('axios')
 const userModel = require('./models/user.js')
 const nodemailer = require('nodemailer')
+const carouselModel = require('./models/carousel.js')
 
 const app = express()
 app.set('view engine', 'ejs')
@@ -27,18 +28,10 @@ let transporter = nodemailer.createTransport({
       }
 });
 
-function sendEmail() {
-    let mailOptions = {
-        from: 'asawayoshanai1024@gmail.com', // Sender email address
-        to: 'heyossam11@gmail.com', // Recipient email address
-        subject: 'Anime/Manga List', // Email subject
-        text: 'Thanks for registering', // Email body
-    };
-    }
 
-
-app.get('/carousel', (req,res) => {
-    res.render('carousel.ejs')
+app.get('/carousel', async (req,res) => {
+    let carousel = await carouselModel.find({})
+    res.render('carousel.ejs', {carousel: carousel})
 })
 
 app.get('/login', (req,res) => {
@@ -55,30 +48,40 @@ app.get('/admin', async (req,res) => {
 
 app.get('/usersList', async (req,res) => {
     let users = await userModel.find({})
-    console.log(users)
     res.render('userList.ejs', {users: users})
 })
 
+app.get('/editCarousel', async(req,res) => {
+    let carousel = await carouselModel.find({})
+    res.render('editCarousel', {carousel: carousel})
+})
+
+app.post('/editCarousel', async (req,res) => {
+    let carousel = await carouselModel.updateOne({_id:req.body.id}, {$set: {title: req.body.title, body: req.body.body, link: req.body.link}})
+    res.redirect('/editCarousel')
+})
+
 app.post('/signup', async (req,res) => {
-    try{
         req.body.password = bcrypt.hashSync(req.body.password, 5)
         let user = await userModel.create(req.body)
         console.log(req.body.email)
-        await transporter.sendMail()
-        res.render('login.ejs')
-    } catch(e){
-        res.render('incorrect')
-    }
+        const mail = await transporter.sendMail({
+            from: "asawayoshanai1024@gmail.com", // sender address
+            to: req.body.email, // list of receivers
+            subject: "Hello ✔", // Subject line
+            text: "Hello world?", // plain text body
+            html: "<b>Hello world?</b>", // html body
+          })
+        res.redirect('login.ejs')
 })
 
 app.post('/login', async (req,res) => {
     let user = await userModel.findOne({login:req.body.login})
-    console.log(user.admin)
-    if(await bcrypt.compare(req.body.password, user.password) && !user.admin){
-        res.redirect('/carousel');
-    }
-    else if(await bcrypt.compare(req.body.password, user.password) && user.admin){
-        res.redirect('/admin')
+    if(await bcrypt.compare(req.body.password, user.password)){
+        if(user.admin)
+            res.redirect('/admin')
+        else
+            res.redirect('/carousel');
     }
     else{
         res.render('incorrect.ejs')
